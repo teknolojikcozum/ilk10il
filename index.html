@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KPSS İller Coğrafyası ve Tarihi Denemesi (100 Soru)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .option-btn { transition: all 0.2s ease; }
+        .option-btn:hover:not(:disabled) { background-color: #e5e7eb; transform: translateX(5px); }
+        .correct { background-color: #22c55e !important; color: white !important; border-color: #16a34a !important; font-weight: bold;}
+        .incorrect { background-color: #ef4444 !important; color: white !important; border-color: #dc2626 !important; }
+        .disabled { opacity: 0.8; cursor: not-allowed; }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body class="bg-slate-100 min-h-screen flex items-center justify-center p-4">
+
+    <div id="quiz-container" class="bg-white rounded-2xl shadow-xl w-full max-w-4xl overflow-hidden flex flex-col">
+        <!-- Header & Stats -->
+        <div class="bg-blue-800 text-white p-6 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div>
+                <h1 class="text-2xl font-bold">KPSS Genel Kültür İller Testi</h1>
+                <p class="text-blue-200 text-sm mt-1">10 İl, 100 Soru - Tarih, Coğrafya ve Kültür</p>
+            </div>
+            <div class="flex gap-4 text-sm font-semibold bg-blue-900 py-2 px-4 rounded-lg">
+                <div class="flex flex-col items-center"><span class="text-blue-300">Soru</span><span id="q-counter">1 / 100</span></div>
+                <div class="w-px bg-blue-700"></div>
+                <div class="flex flex-col items-center"><span class="text-green-400">Doğru</span><span id="score-correct">0</span></div>
+                <div class="w-px bg-blue-700"></div>
+                <div class="flex flex-col items-center"><span class="text-red-400">Yanlış</span><span id="score-wrong">0</span></div>
+            </div>
+        </div>
+
+        <!-- Quiz Area -->
+        <div id="quiz-area" class="p-6 md:p-8 flex-1">
+            <!-- Progress Bar -->
+            <div class="w-full bg-gray-200 rounded-full h-2.5 mb-8">
+                <div id="progress-bar" class="bg-blue-600 h-2.5 rounded-full transition-all duration-300" style="width: 1%"></div>
+            </div>
+
+            <h2 id="question-text" class="text-xl md:text-2xl font-semibold text-gray-800 mb-6 leading-relaxed">
+                <!-- Soru buraya gelecek -->
+            </h2>
+
+            <div id="options-container" class="flex flex-col gap-3">
+                <!-- Şıklar buraya gelecek -->
+            </div>
+
+            <!-- Feedback Area -->
+            <div id="feedback-area" class="mt-8 hidden">
+                <div id="feedback-box" class="p-4 rounded-lg border-l-4">
+                    <h3 id="feedback-title" class="font-bold text-lg mb-1"></h3>
+                    <p id="feedback-info" class="text-gray-700"></p>
+                </div>
+                <button id="next-btn" onclick="nextQuestion()" class="mt-6 w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition shadow-md">
+                    Sonraki Soruya Geç &rarr;
+                </button>
+            </div>
+        </div>
+
+        <!-- Result Area (Hidden initially) -->
+        <div id="result-area" class="p-8 text-center hidden flex-1 flex flex-col justify-center items-center">
+            <h2 class="text-4xl font-bold text-gray-800 mb-4">Sınav Tamamlandı!</h2>
+            <p class="text-gray-600 text-lg mb-8">100 soruluk maratonu bitirdin. İşte sonuçların:</p>
+            
+            <div class="flex gap-8 justify-center mb-8">
+                <div class="bg-green-100 text-green-800 p-6 rounded-xl w-32 shadow-sm border border-green-200">
+                    <div class="text-4xl font-bold mb-2" id="final-correct">0</div>
+                    <div class="text-sm font-semibold uppercase tracking-wide">Doğru</div>
+                </div>
+                <div class="bg-red-100 text-red-800 p-6 rounded-xl w-32 shadow-sm border border-red-200">
+                    <div class="text-4xl font-bold mb-2" id="final-wrong">0</div>
+                    <div class="text-sm font-semibold uppercase tracking-wide">Yanlış</div>
+                </div>
+            </div>
+            
+            <button onclick="location.reload()" class="bg-gray-800 hover:bg-gray-900 text-white font-bold py-3 px-8 rounded-lg transition shadow-md">
+                Testi Yeniden Çöz
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // 100 Soruluk Veritabanı
+        const questions = [
+            // ADANA (1-10)
+            {q:"Türkiye pamuk üretiminde 'beyaz altın' olarak da anılan ve 1. sırada yer alan ilimiz hangisidir?", opts:["Aydın", "Antalya", "Adana", "Şanlıurfa", "Hatay"], ans: 2, info:"Adana, Çukurova havzası sayesinde pamuk üretiminde Türkiye 1.sidir ve pamuğa 'beyaz altın' denir."},
+            {q:"Adana ve çevresinde en uzun süre hüküm süren ve şehri imar eden Türk beyliği hangisidir?", opts:["Ramazanoğulları", "Dulkadiroğulları", "Karamanoğulları", "Aydınoğulları", "Menteşeoğulları"], ans: 0, info:"Ramazanoğulları (1352-1608) Adana'da en uzun süre hüküm süren beyliktir. Ulu Cami ve medreseler bu dönemde yapılmıştır."},
+            {q:"Adana'nın antik çağlardaki tarihi adı aşağıdakilerden hangisidir?", opts:["Pamfilya", "Kapadokya", "İyonya", "Kilikya", "Likya"], ans: 3, info:"Antik çağda bölgenin adı Kilikya'dır. Roma döneminde Pompeius burada korsanlık faaliyetlerini temizlemiştir."},
+            {q:"Adana'nın düşman işgalinden kesin kurtuluş günü (Kurtuluş Günü) hangi tarihtir?", opts:["5 Eylül 1922", "5 Ocak 1922", "12 Şubat 1920", "30 Ağustos 1922", "9 Eylül 1922"], ans: 1, info:"5 Ocak 1922, Adana'nın düşman işgalinden kesin olarak kurtulduğu Kurtuluş Günü'dür."},
+            {q:"Milli Mücadele'nin simgelerinden olan Sütçü İmam olayı, halkın hangi işgale karşı sıktığı ilk kurşundur?", opts:["Yunan İşgali", "İtalyan İşgali", "İngiliz İşgali", "Fransız İşgali", "Ermeni Çeteleri"], ans: 3, info:"Aralık 1919'da yaşanan Sütçü İmam olayı, Güney Cephesi'nde Fransız işgaline karşı halkın sıktığı ilk kurşundur."},
+            {q:"Dünyada halen kullanılan en eski köprülerden biri olan ve Roma döneminden kalan Adana'daki tarihi yapı hangisidir?", opts:["Cendere Köprüsü", "Taş Köprü", "Malabadi Köprüsü", "Uzun Köprü", "Justinianus Köprüsü"], ans: 1, info:"Adana'daki Taş Köprü, Seyhan Nehri üzerinde bulunur ve Roma döneminden kalarak günümüzde halen kullanılan en eski köprülerdendir."},
+            {q:"Aşağıdakilerden hangisi Adana'nın coğrafi yapısında yer alan ve üzerinde baraj bulunan önemli akarsulardan biridir?", opts:["Kızılırmak", "Sakarya", "Gediz", "Seyhan", "Büyük Menderes"], ans: 3, info:"Seyhan Nehri şehir merkezini ikiye böler ve üzerinde Seyhan Barajı bulunur. Ceyhan Nehri de ilin diğer önemli akarsuyudur."},
+            {q:"Adana mutfağının coğrafi işaretli, koç kuzu kıyması ile kılıç şişte pişirilen dünyaca ünlü lezzeti hangisidir?", opts:["Cağ Kebabı", "Tepsi Kebabı", "Adana Kebap", "Besni Kebabı", "Patlıcan Kebabı"], ans: 2, info:"Adana Kebap, coğrafi işaret belgesine sahip, UNESCO somut olmayan kültürel mirası listesinde yer alan meşhur lezzettir."},
+            {q:"Türkiye'nin en yüksek saat kulesi unvanına sahip olan ve Osmanlı döneminde Adana'da inşa edilen yapı hangisidir?", opts:["Dolmabahçe Saat Kulesi", "İzmir Saat Kulesi", "Büyük Saat Kulesi", "Çorum Saat Kulesi", "Yozgat Saat Kulesi"], ans: 2, info:"Büyük Saat Kulesi, 1882 yılında Osmanlı döneminde Adana'da inşa edilmiş Türkiye'nin en yüksek saat kulesidir."},
+            {q:"Adana, Osmaniye ve çevresini Fransız işgalinden kurtaran 20 Ekim 1921 tarihli antlaşma hangisidir?", opts:["Ankara Antlaşması", "Kars Antlaşması", "Gümrü Antlaşması", "Moskova Antlaşması", "Lozan Antlaşması"], ans: 0, info:"20 Ekim 1921 Ankara Antlaşması ile Fransa, TBMM'yi tanımış ve Adana ile çevresi boşaltılarak kurtarılmıştır."},
+            
+            // ADIYAMAN (11-20)
+            {q:"Adıyaman ilimizin İslam orduları tarafından fethedildikten sonra uzun süre kullanılan eski adı nedir?", opts:["Livane", "Karaköse", "Akroinon", "Hısn-ı Mansur", "Ayasuluk"], ans: 3, info:"Hz. Ömer döneminde fethedildikten sonra bölgeye 'Mansur Kalesi' anlamına gelen Hısn-ı Mansur adı verilmiştir."},
+            {q:"Nemrut Dağı'nda bulunan devasa heykeller ve tümülüs hangi krallık dönemine aittir?", opts:["Urartu Krallığı", "Kommagene Krallığı", "Hitit İmparatorluğu", "Lidya Krallığı", "Pontus Krallığı"], ans: 1, info:"MÖ 162-MS 72 arası hüküm süren Kommagene Krallığı (Özellikle Kral I. Antiokhos) Nemrut Dağı'nı inşa ettirmiştir."},
+            {q:"Adıyaman, hangi yılda daha önce bağlı olduğu Malatya'dan ayrılarak il statüsü kazanmıştır?", opts:["1923", "1935", "1954", "1960", "1989"], ans: 2, info:"Adıyaman, 27 Şubat 1954 tarihinde Malatya'dan ayrılarak resmen il statüsü kazanmıştır."},
+            {q:"GAP projesiyle tarımsal üretimi artan Adıyaman, aşağıdaki ürünlerin hangisinde Türkiye üretiminde 2. sıradadır?", opts:["Pamuk", "Antep fıstığı", "Buğday", "Zeytin", "İncir"], ans: 1, info:"Adıyaman, sulama imkanlarının artmasıyla Türkiye'de Antep fıstığı üretiminde Gaziantep'ten sonra 2. sıraya yerleşmiştir."},
+            {q:"Dünyanın en sağlam Roma dönemi kemer köprülerinden biri olan ve Adıyaman'da bulunan köprü hangisidir?", opts:["Taş Köprü", "Malabadi Köprüsü", "Cendere Köprüsü", "Belkıs Köprüsü", "Palu Köprüsü"], ans: 2, info:"Cendere Köprüsü, Septimius Severus dönemine aittir ve Adıyaman'ın (Eski Kahta) en önemli Roma eserlerindendir."},
+            {q:"Kommagene Krallığı'nın yazlık başkenti olan ve Kral I. Antiokhos'un kaya kabartmasının bulunduğu antik kent hangisidir?", opts:["Perge", "Arsameia", "Karakuş Tepesi", "Samsat", "Zeugma"], ans: 1, info:"Arsameia (Eski Kahta), Kommagene'nin yazlık başkenti olup Mithras kültüne ait kalıntıları barındırır."},
+            {q:"Adıyaman'ın coğrafi işaret belgesine sahip olan ve yöreye özgü üzümlerden yapılan tatlı ürünü hangisidir?", opts:["Amasya Çöreği", "Afyon Kaymağı", "Besni Üzüm Pekmezi", "Höşmerim", "Cezerye"], ans: 2, info:"Besni Üzüm Pekmezi, Adıyaman'ın Besni ilçesinde yetiştirilen özel üzümlerle yapılır ve coğrafi işarete sahiptir."},
+            {q:"Güneydoğu Anadolu Projesi (GAP) kapsamında Adıyaman'ın sınırında yer alan ve Fırat Nehri üzerinde kurulu dev baraj hangisidir?", opts:["Keban Barajı", "Birecik Barajı", "Karakaya Barajı", "Atatürk Barajı", "Oymapınar Barajı"], ans: 3, info:"Atatürk Barajı ve gölü, Fırat Nehri havzasında Adıyaman ile Şanlıurfa sınırında yer alır ve GAP'ın kalbidir."},
+            {q:"Kommagene Krallığı'na ait kadın kralların anıt mezarı olan ve üzerindeki kartal heykeliyle dikkat çeken tepe neresidir?", opts:["Karakuş Tepesi", "Nemrut Dağı", "Arsameia", "Göbeklitepe", "Çatalhöyük"], ans: 0, info:"Karakuş Tepesi, Kommagene kadınlarının anıt mezarıdır ve etrafındaki sütunlarla bilinir."},
+            {q:"Milli Mücadele'de Adıyaman'da düşmana karşı ilk direniş teşkilatını (31 Ekim 1919) kuran kişi kimdir?", opts:["Sütçü İmam", "Yörük Ali Efe", "Demirci Mehmet Efe", "Samsatlı Ali Bey", "Şahin Bey"], ans: 3, info:"Samsatlı Ali Bey, Adıyaman'da Fransızlara karşı ilk direniş örgütlenmesini sağlayan önemli bir isimdir."},
+            
+            // AFYONKARAHİSAR (21-30)
+            {q:"Bağımlılık yapıcı madde üretimini önlemek amacıyla ekimi izne tabi olan ve Türkiye üretiminde Afyonkarahisar'ın 1. olduğu ürün hangisidir?", opts:["Tütün", "Kenevir", "Haşhaş", "Çay", "Pamuk"], ans: 2, info:"Afyonkarahisar ismini de aldığı 'haşhaş' üretiminde Türkiye 1.sidir ve üretimi devlet kontrolündedir."},
+            {q:"Türkiye'nin 'Termal Turizm Başkenti' olarak anılan ilimiz aşağıdakilerden hangisidir?", opts:["Ankara", "Balıkesir", "Yalova", "Afyonkarahisar", "Denizli"], ans: 3, info:"Afyonkarahisar; Heybeli, Gazlıgöl, Ömer-Gecek ve Hüdai gibi kaplıcalarıyla termal turizmin başkentidir."},
+            {q:"Büyük Taarruz sırasında Başkomutan Mustafa Kemal Paşa'nın taarruzu yönettiği karargah hangi tepededir?", opts:["Çiğiltepe", "Duatepe", "Metristepe", "Kocatepe", "Tınaztepe"], ans: 3, info:"Mustafa Kemal Paşa, 26 Ağustos 1922'de başlayan Büyük Taarruz'u Afyonkarahisar/Şuhut sınırlarında olan Kocatepe'den yönetmiştir."},
+            {q:"Büyük Taarruz'un zaferle sonuçlandığı 30 Ağustos 1922 tarihindeki savaşın diğer adı nedir?", opts:["Dumlupınar Meydan Muharebesi", "Sakarya Meydan Muharebesi", "I. İnönü Muharebesi", "Aslıhanlar Muharebesi", "Eskişehir-Kütahya Muharebesi"], ans: 0, info:"30 Ağustos Zaferi, Başkomutanlık Meydan Muharebesi veya Dumlupınar Meydan Muharebesi olarak tarihe geçmiştir."},
+            {q:"Afyonkarahisar'da bulunan, antik dönem kaya mezarları ve yeraltı şehirleriyle ünlü tarihi vadi hangisidir?", opts:["Ihlara Vadisi", "Frig Vadisi", "Munzur Vadisi", "Kelebekler Vadisi", "Zelve Vadisi"], ans: 1, info:"İhsaniye (Ayazin) bölgesinde yer alan Frig Vadisi, Friglere ait kaya tapınakları ve mezarlarıyla ünlüdür."},
+            {q:"Afyonkarahisar'ın ihracatta büyük paya sahip olduğu, dünyaca ünlü olan madeni/taşı hangisidir?", opts:["Bor", "Krom", "Bakır", "Mermer", "Boksit"], ans: 3, info:"Afyonkarahisar mermer rezervleri bakımından Türkiye'nin önde gelen illerindendir, özellikle 'Afyon beyazı' mermeri çok ünlüdür."},
+            {q:"Afyonkarahisar mutfağının coğrafi işaretli, manda sütünden yapılan ve yöreyle özdeşleşen ürünü hangisidir?", opts:["Afyon Sahan Kebabı", "Afyon Sucuğu", "Afyon Kaymağı", "Afyon Lokumu", "Ağzıaçık"], ans: 2, info:"Afyon Kaymağı, manda sütünden yapılan ve bal ile tüketilen, kentin en meşhur coğrafi işaretli lezzetidir."},
+            {q:"Roma Dönemi'nde Afyonkarahisar'ın adı aşağıdakilerden hangisidir?", opts:["Ancyra", "Attaleia", "Akroinon", "Adramytteion", "Livane"], ans: 2, info:"Şehir Roma döneminde Akroinon olarak anılmış, 740 yılındaki Akroinon Muharebesi'ne sahne olmuştur."},
+            {q:"Büyük Menderes Nehri'nin kaynaklarından biri olan ve Afyonkarahisar'dan doğan akarsu hangisidir?", opts:["Akarçay", "Gönen Çayı", "Susurluk Çayı", "Göksu Çayı", "Köprüçay"], ans: 0, info:"Akarçay, Afyonkarahisar'dan doğar ve Büyük Menderes havzasını besleyen önemli akarsulardandır."},
+            {q:"Mustafa Kemal Paşa'nın Büyük Taarruz öncesi kullandığı karargah binası günümüzde hangi adla müzeleştirilmiştir?", opts:["Kurtuluş Savaşı Müzesi", "Anadolu Medeniyetleri Müzesi", "Kuva-yi Milliye Müzesi", "Zafer Müzesi", "Cumhuriyet Müzesi"], ans: 3, info:"Büyük Taarruz sırasında karargah olarak kullanılan bina günümüzde 'Zafer Müzesi' adıyla ziyaretçilerini ağırlamaktadır."},
+
+            // AĞRI (31-40)
+            {q:"Cumhuriyet'in ilk yıllarında Karaköse olarak anılan ilimiz 1946 yılında hangi ismi almıştır?", opts:["Artvin", "Ağrı", "Adıyaman", "Amasya", "Aydın"], ans: 1, info:"Karaköse ve Karakeçili olarak bilinen il, 1946 yılında resmen sınırları içindeki dağdan ilhamla Ağrı adını almıştır."},
+            {q:"Avrupa'nın ve Türkiye'nin en yüksek zirvesi (5.137 m) olan doğa harikası hangi ilimizdedir?", opts:["Hakkari", "Van", "Kars", "Erzurum", "Ağrı"], ans: 4, info:"Büyük Ağrı Dağı, 5.137 metre yüksekliği ile Türkiye'nin en yüksek zirvesidir ve sönmüş bir volkandır."},
+            {q:"Osmanlı, Selçuklu, Gürcü ve İran mimarilerinden izler taşıyan ve Doğubayazıt'ta bulunan tarihi eser hangisidir?", opts:["II. Bayezid Külliyesi", "İshak Paşa Sarayı", "Ramazanoğlu Külliyesi", "Çifte Minareli Medrese", "Ani Harabeleri"], ans: 1, info:"UNESCO Geçici Listesi'nde de yer alan İshak Paşa Sarayı, 18. yy Osmanlı saray mimarisinin en özgün eserlerindendir."},
+            {q:"Türkiye ile İran arasındaki en işlek kara hudut kapısı olan ve Ağrı'da yer alan sınır kapısı hangisidir?", opts:["Habur Sınır Kapısı", "Sarp Sınır Kapısı", "Gürbulak Sınır Kapısı", "Kapıkule Sınır Kapısı", "Cilvegözü Sınır Kapısı"], ans: 2, info:"Doğubayazıt'taki Gürbulak Sınır Kapısı, Türkiye'nin İran ve Orta Asya ticaretindeki en önemli geçiş noktasıdır."},
+            {q:"Şeyh Said İsyanı'ndan sonra Doğu Anadolu'da yaşanan ve 1930 yılında Fevzi Çakmak komutasında bastırılan isyan hangisidir?", opts:["Ağrı (Karaköse) İsyanı", "Dersim Olayları", "Koçgiri İsyanı", "Menemen Olayı", "Zaza İsyanı"], ans: 0, info:"1926-1930 yılları arasında Ağrı Dağı merkezli çıkan Ağrı İsyanı, Cumhuriyet döneminin önemli ayaklanmalarındandır."},
+            {q:"Doğu edebiyatının klasiklerinden 'Mem û Zîn' adlı eserin yazarı olan ve türbesi Doğubayazıt'ta bulunan düşünür kimdir?", opts:["Mevlana", "Hacı Bayram-ı Veli", "Karacaoğlan", "Ahmed-i Hani", "Yunus Emre"], ans: 3, info:"17. yüzyıl düşünürü Ahmed-i Hani (Ehmedê Xanî) Ağrı'nın en önemli tarihi isimlerinden biridir."},
+            {q:"Doğubayazıt ilçesinde bulunan ve gök bilim turizmi açısından önemli olan doğal oluşum nedir?", opts:["Karain Mağarası", "Düden Şelalesi", "Cennet-Cehennem Obrukları", "Meteor Çukuru", "Peri Bacaları"], ans: 3, info:"Dünyanın en büyük ikinci meteor çukuru (35m çap, 60m derinlik) Doğubayazıt'tadır."},
+            {q:"Doğu Anadolu Bölgesi'nin en önemli akarsuyu olan ve Ermenistan sınırını çizerek Hazar Gölü'ne dökülen nehir hangisidir?", opts:["Dicle", "Fırat", "Aras", "Kura", "Murat"], ans: 2, info:"Aras Nehri, Ağrı'nın kuzeydoğusundan doğup Ermenistan sınırını çizer ve Hazar'a dökülür."},
+            {q:"İslami ve semavi dinlerin ortak inancına göre büyük tufandan sonra Hz. Nuh'un gemisinin oturduğuna inanılan dağ hangisidir?", opts:["Cudi Dağı", "Süphan Dağı", "Nemrut Dağı", "Ağrı Dağı", "Tendürek Dağı"], ans: 3, info:"Nuh'un Gemisi efsanesinin en bilinen lokasyonu Ağrı Dağı'dır ve inanç turizmi için kritik bir öneme sahiptir."},
+            {q:"Ağrı'nın kesin olarak Osmanlı topraklarında kalmasını sağlayan ve bugünkü Türkiye-İran sınırını çizen 1639 tarihli antlaşma hangisidir?", opts:["Amasya Antlaşması", "Ferhat Paşa Antlaşması", "Kasr-ı Şirin Antlaşması", "Serav Antlaşması", "Nasuh Paşa Antlaşması"], ans: 2, info:"1639 Kasr-ı Şirin Antlaşması ile Osmanlı-İran (Safevî) sınırı çizilmiş ve Ağrı kalıcı olarak Osmanlı'da kalmıştır."},
+
+            // AMASYA (41-50)
+            {q:"Osmanlı döneminde Yıldırım Bayezid, Fatih Sultan Mehmet, Yavuz Sultan Selim gibi padişahların yetiştiği sancak merkezi olan ilimiz neresidir?", opts:["Bursa", "Manisa", "Trabzon", "Amasya", "Edirne"], ans: 3, info:"Amasya, şehzadelerin yönetim tecrübesi kazandığı en önemli sancaklardan biri olduğu için 'Şehzadeler Şehri' olarak anılır."},
+            {q:"Millî Mücadele'nin amacı, yöntemi ve gerekçesinin ilk kez açıklandığı ve 'Milletin bağımsızlığını yine milletin azim ve kararı kurtaracaktır' maddesini içeren belge hangisidir?", opts:["Erzurum Kongresi", "Amasya Genelgesi", "Sivas Kongresi", "Misak-ı Milli", "Amasya Görüşmeleri"], ans: 1, info:"12 Haziran 1919 tarihli Amasya Genelgesi, Millî Mücadele'nin ilk kurumsal adımı ve ihtilal bildirisidir."},
+            {q:"Pontus krallarına ait olan ve Harşena Dağı eteklerine oyulan, Amasya'nın UNESCO Geçici Listesi'ndeki simgesi nedir?", opts:["Kral Kaya Mezarları", "II. Bayezid Külliyesi", "Amasya Evleri", "Göbeklitepe", "Arsameia"], ans: 0, info:"Kral Kaya Mezarları, Helenistik Pontus Krallığı dönemine ait anıtsal yapılardır ve Amasya vadisinin dik yamaçlarındadır."},
+            {q:"Antik çağın en önemli coğrafyacısı kabul edilen ve 17 ciltlik 'Geographika' adlı eseri yazan Strabon nerede doğmuştur?", opts:["Efes", "Milet", "Amasya", "Antalya", "Balıkesir"], ans: 2, info:"MÖ 64 - MS 24 yıllarında yaşamış ünlü coğrafyacı Strabon, Amasya doğumludur."},
+            {q:"İstanbul hükümetinin, Anadolu'daki direniş hareketini (Heyet-i Temsiliye'yi) resmen tanıdığı diplomatik olay hangisidir?", opts:["Amasya Görüşmeleri", "Sivas Kongresi", "Bilecik Görüşmesi", "Lozan Barış Konferansı", "Mudanya Ateşkesi"], ans: 0, info:"20-22 Ekim 1919'da Salih Paşa ile Mustafa Kemal Paşa arasında yapılan Amasya Görüşmeleri ile Temsil Heyeti resmen tanınmıştır."},
+            {q:"Amasya şehir merkezini ikiye bölen ve şehre hayat veren, Karadeniz'e dökülen nehir hangisidir?", opts:["Kızılırmak", "Sakarya", "Yeşilırmak", "Çoruh", "Fırat"], ans: 2, info:"Yeşilırmak Nehri, Amasya'da dar bir vadi içinden akarak Tokat ve Samsun üzerinden denize dökülür."},
+            {q:"Coğrafi işaret belgesine sahip olan ve Türkiye'nin en kaliteli sofralık çeşitlerinden olan Amasya'ya özgü meyve hangisidir?", opts:["Kiraz", "Armut", "Üzüm", "Elma", "İncir"], ans: 3, info:"Amasya Elması (Misket elması), küçük, sert, sulu yapısı ve coğrafi işaretiyle ilin en önemli tarımsal markasıdır."},
+            {q:"Amasya'da bulunan ve cami, medrese, darüşşifa gibi bölümleriyle Osmanlı mimarisinin başyapıtlarından olan külliye kimin adını taşır?", opts:["I. Süleyman (Kanuni)", "II. Bayezid", "Fatih Sultan Mehmet", "Yavuz Sultan Selim", "II. Murat"], ans: 1, info:"II. Bayezid Külliyesi, 15. yüzyıl sonlarında inşa edilen ve Amasya'nın en önemli tarihi kompleksidir."},
+            {q:"Amasya ile özdeşleşen ve dağların delinerek su getirildiğine inanılan ünlü efsane kahramanları kimlerdir?", opts:["Leyla ile Mecnun", "Kerem ile Aslı", "Ferhat ile Şirin", "Arzu ile Kamber", "Tahir ile Zühre"], ans: 2, info:"Ferhat ile Şirin efsanesi Amasya'da geçer. İlde Ferhat Kanalı ve bir açık hava müzesi bulunur."},
+            {q:"Antik çağda Amasya'yı başkent yapan ve Roma'ya karşı uzun süre direnen Karadeniz kökenli krallık hangisidir?", opts:["Lidya Krallığı", "Kommagene Krallığı", "Bergama Krallığı", "Pontus Krallığı", "Galatya Krallığı"], ans: 3, info:"MÖ 302 - MS 46 yıllarında varlık gösteren Pontus Krallığı'nın ilk başkenti Amasya olmuştur."},
+
+            // ANKARA (51-60)
+            {q:"Türkiye Büyük Millet Meclisi (TBMM) hangi tarihte kabul edilen bir kanunla Ankara'yı başkent ilan etmiştir?", opts:["23 Nisan 1920", "29 Ekim 1923", "13 Ekim 1923", "1 Kasım 1922", "10 Kasım 1938"], ans: 2, info:"Ankara, Cumhuriyet'in ilanından kısa bir süre önce, 13 Ekim 1923'te Türkiye'nin resmen başkenti olmuştur."},
+            {q:"Osmanlı Devleti'nin Fetret Devri'ne girmesine neden olan ve Yıldırım Bayezid'in Timur'a yenildiği 1402 tarihli savaş hangisidir?", opts:["Niğbolu Savaşı", "Varna Savaşı", "Ankara Savaşı", "Kosova Savaşı", "Mohaç Savaşı"], ans: 2, info:"20 Temmuz 1402'de Çubuk Ovası'nda gerçekleşen Ankara Savaşı, Osmanlı'yı yıkılma tehlikesiyle karşı karşıya bırakmıştır."},
+            {q:"Ankara'da Hacı Bayram-ı Veli Camii'nin hemen yanında bulunan ve 'Res Gestae' yazıtını barındıran Roma eseri hangisidir?", opts:["Hadrianus Kapısı", "Augustus Tapınağı", "Aspendos Tiyatrosu", "Celsus Kütüphanesi", "Cendere Köprüsü"], ans: 1, info:"Roma İmparatoru Augustus adına yapılan tapınak, tarihsel katmanlaşmanın en güzel örneklerinden biri olarak caminin yanındadır."},
+            {q:"Tarih boyunca Ankara'nın ekonomisinde önemli bir yer tutan ve 'sof' dokumacılığının hammaddesi olan canlı hangisidir?", opts:["Merinos Koyunu", "İpek Böceği", "Tiftik Keçisi", "Manda", "Sakarca Kazı"], ans: 2, info:"Ankara (Tiftik) Keçisi, ilin simgelerinden biridir ve sof dokumacılığı ile Ankara ticaretini uzun süre ayakta tutmuştur."},
+            {q:"1997 yılında Avrupa Yılın Müzesi ödülünü alan, Hitit ve Frig eserleriyle ünlü müze hangisidir?", opts:["Etnografya Müzesi", "Kurtuluş Savaşı Müzesi", "Cumhuriyet Müzesi", "Anadolu Medeniyetleri Müzesi", "Aydın Müzesi"], ans: 3, info:"Anadolu Medeniyetleri Müzesi, dünyanın en önemli arkeoloji müzelerinden biri olup Ankara Kalesi eteklerindedir."},
+            {q:"Kızılırmak ve Fırat'tan sonra Türkiye'nin 3. uzun akarsuyu olan ve Ankara'nın batı sınırını çizen nehir hangisidir?", opts:["Seyhan", "Büyük Menderes", "Çoruh", "Yeşilırmak", "Sakarya"], ans: 4, info:"Sakarya Nehri, İç Anadolu'dan doğup Ankara sınırlarından geçerek Karadeniz'e dökülen devasa bir akarsudur."},
+            {q:"Günümüzde TUSAŞ, ROKETSAN, MKE gibi dev kuruluşlara ev sahipliği yaparak Türkiye'nin üssü konumunda olduğu sanayi dalı hangisidir?", opts:["Tekstil Sanayisi", "Otomotiv Sanayisi", "Gıda Sanayisi", "Savunma Sanayisi", "Petrokimya"], ans: 3, info:"Ankara, barındırdığı büyük teknoloji ve silah fabrikaları ile Türkiye'nin açık ara savunma sanayi başkentidir."},
+            {q:"'Egemenlik kayıtsız şartsız milletindir' ilkesinin ilk kez resmen yer aldığı ve 1921'de Ankara'da kabul edilen anayasa hangisidir?", opts:["Kanun-i Esasi", "Teşkilat-ı Esasiye", "1924 Anayasası", "1961 Anayasası", "Sened-i İttifak"], ans: 1, info:"20 Ocak 1921'de TBMM'de kabul edilen Teşkilat-ı Esasiye Kanunu, yeni Türk devletinin ilk anayasasıdır."},
+            {q:"Osmanlı sivil mimarisinin en iyi korunduğu, UNESCO Geçici Listesi'nde yer alan ve 'kuru'suyla (simit) meşhur Ankara ilçesi hangisidir?", opts:["Gölbaşı", "Kızılcahamam", "Çubuk", "Beypazarı", "Polatlı"], ans: 3, info:"Beypazarı, tarihi konakları, havucu ve Beypazarı Kurusu (coğrafi işaretli) ile önemli bir kültür ve turizm merkezidir."},
+            {q:"14. yüzyılda Ankara'da yaşamış, Bayramiyye Tarikatı'nın kurucusu olan ünlü mutasavvıf kimdir?", opts:["Ahi Evran", "Hacı Bektaş Veli", "Hacı Bayram-ı Veli", "Yunus Emre", "Mevlana"], ans: 2, info:"Hacı Bayram-ı Veli, Ankara'nın manevi mimarı kabul edilir ve türbesi Ulus'tadır."},
+
+            // ANTALYA (61-70)
+            {q:"Türkiye'nin yıllık turist sayısı ve turizm gelirleri açısından açık ara 1. sırasında yer alan ili hangisidir?", opts:["İstanbul", "İzmir", "Muğla", "Aydın", "Antalya"], ans: 4, info:"'Turizm Başkenti' Antalya, ağırladığı yabancı turist sayısı ve gelirleriyle Türkiye ekonomisinde 1. sıradadır."},
+            {q:"Dünyanın en iyi korunmuş antik Roma tiyatrosu olarak kabul edilen ve Antalya'da bulunan yapı hangisidir?", opts:["Efes Tiyatrosu", "Milet Tiyatrosu", "Aspendos Tiyatrosu", "Perge Tiyatrosu", "Hierapolis Tiyatrosu"], ans: 2, info:"Aspendos, Pamfilya bölgesinde yer alır ve akustiği ile dünyaca ünlü en sağlam antik tiyatrolardandır."},
+            {q:"Hristiyan dünyası için hac merkezi sayılan ve 'Noel Baba' olarak bilinen Aziz Nikolaos'un yaşadığı antik kent neresidir?", opts:["Olimpos", "Myra (Demre)", "Patara", "Xanthos", "Phaselis"], ans: 1, info:"Aziz Nikolaos, Demre'de (Antik Myra) yaşamış bir piskopostur ve Noel Baba figürünün kökenidir."},
+            {q:"Antalya'nın tarım sektöründe Türkiye üretiminde 1. sırada yer aldığı, iklim avantajına dayalı tarım yöntemi hangisidir?", opts:["Nadas Tarımı", "Plantasyon Tarımı", "Seracılık (Örtü Altı)", "Kuru Tarım", "İntansif Tahıl Tarımı"], ans: 2, info:"Antalya, kışların ılık geçmesi sayesinde Türkiye'nin örtü altı tarım (seracılık) merkezidir."},
+            {q:"1988 yılında UNESCO Dünya Mirası Listesi'ne giren ve Likya Uygarlığı'nın dini/siyasi merkezi olan antik alan hangisidir?", opts:["Perge ve Aspendos", "Kaleiçi", "Xanthos-Letoon", "Termessos", "Afrodisias"], ans: 2, info:"Xanthos (Kınık) ve Letoon (Eşen), Likya birliğinin en önemli merkezleri olup UNESCO listesindedir."},
+            {q:"Antalya'nın kuzeyinde Güllük Dağı'nda bulunan ve Büyük İskender'in fethedemediği efsanevi antik kent hangisidir?", opts:["Termessos", "Sillyon", "Perge", "Olimpos", "Ariassos"], ans: 0, info:"Sarp dağlık konumu sayesinde Termessos, Büyük İskender'e boyun eğmeyen tek antik kent olarak bilinir."},
+            {q:"Antalya'nın tarihi merkezi olan, Yivli Minare ve Hadrianus Kapısı'nı (Üçkapılar) barındıran bölgenin adı nedir?", opts:["Kaleiçi", "Lara", "Konyaaltı", "Belek", "Kemer"], ans: 0, info:"Kaleiçi, Antalya'nın ilk kurulduğu yerdir ve Selçuklu ile Roma mimarisinin iç içe geçtiği koruma alanıdır."},
+            {q:"Aşağıdakilerden hangisi Antalya'nın sahip olduğu karstik arazi yapısının bir sonucu olan ünlü şelalelerinden biridir?", opts:["Tortum", "Muradiye", "Düden", "Girlevik", "Tatlıca"], ans: 2, info:"Düden, Kurşunlu ve Manavgat şelaleleri Antalya'nın karstik (kalkerli) arazisinin oluşturduğu doğal güzelliklerdir."},
+            {q:"Mondros Mütarekesi sonrası Antalya'yı işgal eden ancak Milli Mücadele döneminde (5 Temmuz 1921) çekilen devlet hangisidir?", opts:["Yunanistan", "Fransa", "İngiltere", "İtalya", "Rusya"], ans: 3, info:"Antalya bölgesi (Güneybatı Anadolu) İtalyanlara vaat edilmiş ve işgal edilmiş, Ankara Antlaşması sonrası boşaltılmıştır."},
+            {q:"MÖ 159 yılında Attaleia şehrini kurarak günümüz Antalya'sına adını veren Bergama Kralı kimdir?", opts:["I. Antiokhos", "II. Attalos", "Büyük İskender", "Pompeius", "Vespasianus"], ans: 1, info:"Şehrin adı, kurucusu olan Bergama Kralı II. Attalos'tan (Attaleia) gelmektedir."},
+
+            // ARTVİN (71-80)
+            {q:"Türkiye ile Gürcistan arasındaki en işlek kara hudut kapısı olan ve Artvin'de bulunan sınır kapısı hangisidir?", opts:["Habur", "Cilvegözü", "Sarp", "Dilucu", "Dereköy"], ans: 2, info:"Sarp Sınır Kapısı, Karadeniz sahil yolu üzerinden Kafkasya'ya açılan stratejik bir kapıdır."},
+            {q:"Türkiye'nin en hızlı akan nehri olan ve hidroelektrik enerji potansiyeli çok yüksek olan nehir hangisidir?", opts:["Çoruh Nehri", "Fırat Nehri", "Kızılırmak", "Göksu", "Aras"], ans: 0, info:"Çoruh Nehri Artvin'i boydan boya böler ve üzerinde Deriner, Yusufeli gibi devasa barajlar bulunur."},
+            {q:"1877-1878 Osmanlı-Rus Savaşı (93 Harbi) sonrasında Artvin'in Rusya'ya bırakılmasını kesinleştiren antlaşma hangisidir?", opts:["Brest-Litovsk", "Ayastefanos", "Berlin Antlaşması", "Kars Antlaşması", "Paris Antlaşması"], ans: 2, info:"Berlin Antlaşması (1878) ile Kars, Ardahan, Batum ve Artvin (Elviye-i Selase) Rus yönetimine girmiştir."},
+            {q:"Her yıl Ağustos ayında boğa güreşleri ve şenliklerle ünlü Kafkasör Festivali'nin düzenlendiği ilimiz hangisidir?", opts:["Rize", "Trabzon", "Artvin", "Ordu", "Giresun"], ans: 2, info:"Kafkasör Yaylası'nda düzenlenen festival, Artvin'in en önemli somut olmayan kültürel miraslarındandır."},
+            {q:"Artvin'in Osmanlı döneminde ve geçmişte uzun süre kullanılan tarihi adı aşağıdakilerden hangisidir?", opts:["Hısn-ı Mansur", "Karaköse", "Livane", "Akroinon", "Ancyra"], ans: 2, info:"Artvin şehri, tarihi belgelerde Livane (Livana) Sancağı olarak geçmektedir ve kale de Livane Kalesi olarak bilinir."},
+            {q:"Doğu Karadeniz Dağları'nın en yüksek zirvesine sahip olan (3.937 m) ve Artvin'de Milli Park statüsünde olan dağ hangisidir?", opts:["Kaçkar Dağı", "Palandöken Dağı", "Süphan Dağı", "Küre Dağları", "Ilgaz Dağı"], ans: 0, info:"Kaçkar Dağları Milli Parkı, buzul gölleri, ormanları ve yaylalarıyla Artvin ve Rize sınırlarında devasa bir doğa alanıdır."},
+            {q:"Orta Çağ'da bölgeye hakim olan Gürcü Krallığı (Bagrationi) döneminden kalan ve Artvin'de bulunan önemli tarihi yapı hangisidir?", opts:["Sümela Manastırı", "Akdamar Kilisesi", "İshak Paşa Sarayı", "Öşk Vank Manastırı", "Deyrulzafaran"], ans: 3, info:"Artvin ve çevresinde (Tao-Klarceti) İşhan, Öşk Vank ve Barhal gibi çok önemli Gürcü kilise ve manastırları vardır."},
+            {q:"Artvin'in Rus işgaline uğraması sebebiyle tarihimizde büyük göç hareketlerine sahne olan ve halk dilinde anılan savaş hangisidir?", opts:["Kırım Savaşı", "93 Harbi", "Trablusgarp Savaşı", "Balkan Savaşları", "I. Dünya Savaşı"], ans: 1, info:"1877-1878 yılları arasındaki 93 Harbi sebebiyle Artvinliler Anadolu'nun içlerine ve Marmara'ya büyük göçler vermiştir."},
+            {q:"Milli Mücadele sonrası Artvin'in anavatan Türkiye'ye katılarak resmen il statüsü kazandığı 'Kurtuluş Günü' hangi tarihtir?", opts:["30 Ağustos 1922", "9 Eylül 1922", "5 Ocak 1922", "7 Mart 1921", "29 Ekim 1923"], ans: 3, info:"Artvin, diplomatik ve askeri başarılar sonucu 7 Mart 1921'de TBMM kararıyla Türkiye'ye katılmıştır."},
+            {q:"Artvin'de, özellikle Macahel yöresinde çok yaygın olan ve yüksek gelir getiren tarımsal faaliyet hangisidir?", opts:["Pamuk", "İncir", "Arıcılık", "Zeytin", "Ayçiçeği"], ans: 2, info:"Zengin bitki örtüsü (flora) sayesinde Artvin arıcılıkta ve özel bal (Kestane, Kafkas arısı balı) üretiminde lider illerdendir."},
+
+            // AYDIN (81-90)
+            {q:"Türkiye'nin dünya çapında 1. sırada olduğu 'kuru incir' üretiminin büyük kısmını karşılayan ve ürüne coğrafi işaret alan ilimiz hangisidir?", opts:["İzmir", "Aydın", "Bursa", "Gaziantep", "Muğla"], ans: 1, info:"Büyük Menderes Ovası'nın verimli toprakları sayesinde Aydın, kuru incir üretiminde tartışmasız Türkiye ve dünya lideridir."},
+            {q:"Aydın'ın Karacasu ilçesinde yer alan, mermer işçiliğiyle ünlü ve 2017'de UNESCO Dünya Mirası Listesi'ne giren antik kent hangisidir?", opts:["Efes", "Hierapolis", "Afrodisias", "Perge", "Gordion"], ans: 2, info:"Afrodisias Antik Kenti, Aphrodite Tapınağı ve antik heykeltıraşlık okulu ile ünlü Karya (Caria) medeniyeti kentidir."},
+            {q:"Millî Mücadele yıllarında Aydın yöresinde Kuva-yi Milliye direnişinin simgesi haline gelen ünlü efe kimdir?", opts:["Hasan Tahsin", "Sütçü İmam", "Yörük Ali Efe", "Şahin Bey", "Gördesli Makbule"], ans: 2, info:"Yörük Ali Efe, Aydın'ı Yunan işgalinden kurtarmak için başlatılan silahlı direnişin en büyük liderlerindendir."},
+            {q:"Antik çağda 'Doğa Felsefesi'nin kurucusu sayılan Thales, Anaksimandros ve Anaksimenes hangi Aydın (Didim) antik kentinde yetişmiştir?", opts:["Milet (Miletus)", "Efes", "Priene", "Magnesia", "Sardes"], ans: 0, info:"Milet Antik Kenti, İyonya'nın en önemli felsefe ve bilim okullarından birine (Milet Okulu) ev sahipliği yapmıştır."},
+            {q:"Büyük Taarruz'un başarıya ulaşmasıyla Yunan ordusunun çekildiği ve Aydın'ın kesin olarak kurtulduğu tarih hangisidir?", opts:["9 Eylül 1922", "5 Eylül 1922", "30 Ağustos 1922", "26 Ağustos 1922", "15 Mayıs 1919"], ans: 1, info:"Aydın, efelerin ve Türk ordusunun ortak mücadelesiyle 5 Eylül 1922'de işgalden tamamen kurtulmuştur."},
+            {q:"1308-1426 yılları arasında Aydın ve çevresinde kurulan, denizcilikte ünlü Gazi Umur Bey'in yönettiği beylik hangisidir?", opts:["Karesioğulları", "Saruhanoğulları", "Menteşeoğulları", "Aydınoğulları", "Hamitoğulları"], ans: 3, info:"Aydınoğulları Beyliği, Batı Anadolu'da denizcilik faaliyetleriyle güçlenmiş ve sonradan Osmanlı'ya katılmıştır."},
+            {q:"Aydın ilinden geçerek Ege Denizi'ne dökülen ve çok fazla kıvrım yapmasıyla literatüre adını veren nehir hangisidir?", opts:["Gediz", "Küçük Menderes", "Büyük Menderes", "Bakırçay", "Meriç"], ans: 2, info:"Büyük Menderes (Antik Maiandros), çizdiği zikzaklar (menderes) ile meşhur, bölgenin tarımını besleyen nehirdir."},
+            {q:"Aydın'ın turizmde can damarı olan ve Türkiye'nin en büyük kruvaziyer gemi limanlarından birine sahip ilçesi hangisidir?", opts:["Didim", "Söke", "Nazilli", "Kuşadası", "Bozdoğan"], ans: 3, info:"Kuşadası Limanı, deniz turizmi ve özellikle uluslararası kruvaziyer (dev yolcu gemisi) turizminde lider konumdadır."},
+            {q:"Aydın notlarında kültür mirası olarak işlenen ve Hristiyan dünyası için Papa'nın da ziyaret ettiği hac merkezi olan ev neresidir?", opts:["Noel Baba Kilisesi", "Meryem Ana Evi", "Sümela Manastırı", "Akdamar Kilisesi", "St. Pierre Kilisesi"], ans: 1, info:"Bülbüldağı'nda (Selçuk/Efes yakınları) yer alan Meryem Ana Evi, Hristiyanların kutsal hac mekanlarındandır."},
+            {q:"Osmanlı mimarisinden ziyade Ege mutfağı ile öne çıkan Aydın'ın Söke ilçesine özgü coğrafi işaretli peynir türü hangisidir?", opts:["Ezine Peyniri", "Divle Obruk Peyniri", "Söke Peyniri (Çeçil)", "Kars Kaşarı", "Lor Peyniri"], ans: 2, info:"Söke Peyniri (Söke çeçili), mandacılık ve büyükbaş hayvancılıkla elde edilen yöreye özgü tescilli bir üründür."},
+
+            // BALIKESİR (91-100)
+            {q:"Osmanlı Devleti'ne katılarak donanması sayesinde Rumeli'ye geçişi kolaylaştıran ve Balıkesir merkezli kurulan beylik hangisidir?", opts:["Aydınoğulları", "Menteşeoğulları", "Karesioğulları", "Candaroğulları", "Dulkadiroğulları"], ans: 2, info:"Karesioğulları Beyliği 1361'de Orhan Gazi döneminde Osmanlı'ya katılmış ve ilk donanma gücünü oluşturmuştur."},
+            {q:"İzmir'in işgalinden sonra Batı Anadolu'da Kuva-yi Milliye teşkilatlanmasını başlatan ilk milli kongre hangisidir?", opts:["Erzurum Kongresi", "Sivas Kongresi", "Alaşehir Kongresi", "Balıkesir Kongresi", "Afyon Kongresi"], ans: 3, info:"Temmuz 1919'daki Balıkesir Kongresi, Redd-i İlhak Cemiyeti'ni kuran ve silahlı direnişi başlatan ilk bölgesel kongredir."},
+            {q:"Antik çağda 'İda Dağı' olarak bilinen, Tanrıların yaşadığı yer efsanesiyle ünlü ve Balıkesir'deki Milli Park hangisidir?", opts:["Uludağ", "Kaz Dağları", "Madra Dağı", "Spil Dağı", "Küre Dağları"], ans: 1, info:"Kaz Dağları (İda Dağı), Homeros'un İlyada'sında geçer ve hem mitolojik hem de endemik flora açısından dünya çapında öneme sahiptir."},
+            {q:"Balıkesir'in coğrafi işaret belgesine sahip olan ve peynir, irmik, şeker kullanılarak yapılan yöresel tatlısı hangisidir?", opts:["Höşmerim", "Kerebiç", "Kazandibi", "Sütlaç", "Künefe"], ans: 0, info:"Höşmerim, Balıkesir yöresiyle özdeşleşmiş meşhur peynir helvasıdır ve coğrafi işarete sahiptir."},
+            {q:"UNESCO Geçici Listesi'nde yer alan, göçmen kuşların uğrak noktası olan ve 1959'da kurulan Balıkesir'deki milli park hangisidir?", opts:["Yedigöller", "İğneada Longoz Ormanları", "Manyas Kuş Cenneti", "Gala Gölü", "Kovada Gölü"], ans: 2, info:"Manyas (Kuş) Gölü, Türkiye'nin ilk kuş cenneti milli parkıdır ve zengin ornitolojik yapısıyla korunmaktadır."},
+            {q:"Marmara Denizi'nin güneyinde yer alan ve gemi söküm, sanayi, tahıl ihracatı gibi özellikleriyle Balıkesir'in en büyük liman ilçesi hangisidir?", opts:["Erdek", "Bandırma", "Ayvalık", "Edremit", "Burhaniye"], ans: 1, info:"Bandırma Limanı, Türkiye'nin ve Marmara'nın en büyük ticaret limanlarından biri olup sanayi merkezidir."},
+            {q:"Balıkesir ilinin Türkiye coğrafyasındaki en belirgin ve nadir görülen fiziki özelliği aşağıdakilerden hangisidir?", opts:["Türkiye'nin en yüksek dağına sahip olması", "En uzun akarsuya sahip olması", "İki farklı denize (Marmara ve Ege) kıyısı olması", "Çöl iklimi görülmesi", "Hiç ormanlık alanının olmaması"], ans: 2, info:"Balıkesir, kuzeyde Marmara Denizi'ne (Bandırma, Erdek) ve batıda Ege Denizi'ne (Ayvalık, Edremit) kıyısı olan nadir illerdendir."},
+            {q:"Büyük Taarruz'un başarıya ulaşmasıyla Balıkesir'in Yunan işgalinden kesin olarak kurtulduğu tarih hangisidir?", opts:["6 Eylül 1922", "9 Eylül 1922", "30 Ağustos 1922", "5 Ocak 1922", "12 Şubat 1920"], ans: 0, info:"Balıkesir halkının güçlü direnişi ve Türk ordusunun taarruzuyla kent 6 Eylül 1922'de işgalden kurtarılmıştır."},
+            {q:"Balıkesir'de Kuva-yi Milliye hareketinin önderlerinden olan, kongrenin toplanmasında etkili olan gazeteci ve milletvekili kimdir?", opts:["Mustafa Fehmi Kubilay", "Sütçü İmam", "Hasan Tahsin", "Hasan Basri Çantay", "Ali Fuat Cebesoy"], ans: 3, info:"Hasan Basri Çantay, Balıkesir'de bağımsızlık ateşini yakan ve Milli Mücadele'ye büyük destek veren aydınlardandır."},
+            {q:"Balıkesir'in Edremit Körfezi, Ayvalık ve Burhaniye gibi ilçelerinde Türkiye ekonomisine yön veren en önemli tarımsal faaliyet hangisidir?", opts:["Çay Yetiştiriciliği", "Zeytin ve Zeytinyağı Üretimi", "Fındık Üretimi", "Muz Yetiştiriciliği", "Seracılık"], ans: 1, info:"Kaz Dağları'nın oksijeniyle yetişen Ayvalık/Edremit zeytinleri ve zeytinyağları, coğrafi işaretli olup Türkiye'nin en kalitelileri arasındadır."}
+        ];
+
+        // Uygulama Değişkenleri
+        let currentQuestionIndex = 0;
+        let scoreCorrect = 0;
+        let scoreWrong = 0;
+        let answered = false;
+
+        // DOM Elementleri
+        const elQuestionText = document.getElementById('question-text');
+        const elOptionsContainer = document.getElementById('options-container');
+        const elFeedbackArea = document.getElementById('feedback-area');
+        const elFeedbackTitle = document.getElementById('feedback-title');
+        const elFeedbackInfo = document.getElementById('feedback-info');
+        const elFeedbackBox = document.getElementById('feedback-box');
+        const elQCounter = document.getElementById('q-counter');
+        const elScoreCorrect = document.getElementById('score-correct');
+        const elScoreWrong = document.getElementById('score-wrong');
+        const elProgressBar = document.getElementById('progress-bar');
+        const elNextBtn = document.getElementById('next-btn');
+        
+        const elQuizArea = document.getElementById('quiz-area');
+        const elResultArea = document.getElementById('result-area');
+
+        // İlk Soruyu Yükle
+        loadQuestion();
+
+        function loadQuestion() {
+            // Durumu Sıfırla
+            answered = false;
+            elFeedbackArea.classList.add('hidden');
+            elOptionsContainer.innerHTML = '';
+            
+            // Veriyi Çek
+            const qData = questions[currentQuestionIndex];
+            
+            // İlerlemeyi Güncelle
+            elQCounter.innerText = `${currentQuestionIndex + 1} / 100`;
+            elProgressBar.style.width = `${((currentQuestionIndex + 1) / 100) * 100}%`;
+            
+            // Soruyu Yazdır
+            elQuestionText.innerText = `${currentQuestionIndex + 1}. ${qData.q}`;
+
+            // Şıkları Oluştur
+            const optionPrefixes = ['A', 'B', 'C', 'D', 'E'];
+            qData.opts.forEach((optText, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn w-full text-left p-4 rounded-xl border-2 border-gray-200 bg-gray-50 text-gray-700 font-medium hover:border-blue-400 focus:outline-none flex gap-3 items-center';
+                btn.innerHTML = `<span class="bg-gray-200 text-gray-600 rounded w-8 h-8 flex items-center justify-center font-bold font-mono">${optionPrefixes[index]}</span> <span>${optText}</span>`;
+                btn.onclick = () => checkAnswer(index, btn);
+                elOptionsContainer.appendChild(btn);
+            });
+
+            // Son Soruysa Buton Metnini Değiştir
+            if(currentQuestionIndex === questions.length - 1) {
+                elNextBtn.innerHTML = "Sınavı Bitir ve Sonucu Gör &rarr;";
+                elNextBtn.classList.replace('bg-blue-600', 'bg-green-600');
+                elNextBtn.classList.replace('hover:bg-blue-700', 'hover:bg-green-700');
+            }
+        }
+
+        function checkAnswer(selectedIndex, clickedBtn) {
+            if(answered) return; // Zaten cevaplandıysa işlem yapma
+            answered = true;
+
+            const qData = questions[currentQuestionIndex];
+            const isCorrect = (selectedIndex === qData.ans);
+            const allButtons = elOptionsContainer.querySelectorAll('button');
+
+            // Tüm butonları devre dışı bırak
+            allButtons.forEach(btn => {
+                btn.classList.add('disabled');
+                btn.disabled = true;
+            });
+
+            // Renklendirme ve Skor
+            if(isCorrect) {
+                clickedBtn.classList.add('correct');
+                scoreCorrect++;
+                elScoreCorrect.innerText = scoreCorrect;
+                showFeedback(true, qData.info);
+            } else {
+                clickedBtn.classList.add('incorrect');
+                // Doğru olanı da yeşil yap
+                allButtons[qData.ans].classList.add('correct');
+                scoreWrong++;
+                elScoreWrong.innerText = scoreWrong;
+                showFeedback(false, qData.info);
+            }
+        }
+
+        function showFeedback(isCorrect, infoText) {
+            elFeedbackArea.classList.remove('hidden');
+            
+            if(isCorrect) {
+                elFeedbackBox.className = 'p-4 rounded-lg border-l-4 bg-green-50 border-green-500 text-green-800';
+                elFeedbackTitle.innerText = 'Tebrikler, Doğru Cevap!';
+            } else {
+                elFeedbackBox.className = 'p-4 rounded-lg border-l-4 bg-red-50 border-red-500 text-red-800';
+                elFeedbackTitle.innerText = 'Yanlış Cevap!';
+            }
+            
+            elFeedbackInfo.innerText = infoText;
+        }
+
+        function nextQuestion() {
+            if(currentQuestionIndex < questions.length - 1) {
+                currentQuestionIndex++;
+                loadQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function showResults() {
+            elQuizArea.classList.add('hidden');
+            elResultArea.classList.remove('hidden');
+            
+            document.getElementById('final-correct').innerText = scoreCorrect;
+            document.getElementById('final-wrong').innerText = scoreWrong;
+        }
+    </script>
+</body>
+</html>
