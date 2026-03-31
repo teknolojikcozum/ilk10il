@@ -14,11 +14,17 @@
         .incorrect { background-color: #ef4444 !important; color: white !important; border-color: #dc2626 !important; }
         .disabled { opacity: 0.8; cursor: not-allowed; }
         .hidden { display: none !important; }
+        
+        /* Custom Scrollbar for the grid */
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
     </style>
 </head>
 <body class="bg-slate-100 min-h-screen flex items-center justify-center p-4">
 
-    <div id="quiz-container" class="bg-white rounded-2xl shadow-xl w-full max-w-4xl overflow-hidden flex flex-col">
+    <div id="quiz-container" class="bg-white rounded-2xl shadow-xl w-full max-w-4xl overflow-hidden flex flex-col my-8">
         <!-- Header & Stats -->
         <div class="bg-blue-800 text-white p-6 flex flex-col md:flex-row justify-between items-center gap-4">
             <div>
@@ -53,18 +59,42 @@
             <div id="feedback-area" class="mt-8 hidden">
                 <div id="feedback-box" class="p-4 rounded-lg border-l-4">
                     <h3 id="feedback-title" class="font-bold text-lg mb-1"></h3>
-                    <p id="feedback-info" class="text-gray-700"></p>
+                    <p id="feedback-info" class="text-gray-700 mt-2"></p>
                 </div>
-                <button id="next-btn" onclick="nextQuestion()" class="mt-6 w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition shadow-md">
+            </div>
+
+            <!-- Controls -->
+            <div class="mt-6 flex gap-4">
+                <button id="next-btn" onclick="nextQuestion()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition shadow-md">
                     Sonraki Soruya Geç &rarr;
+                </button>
+            </div>
+
+            <!-- Question Navigator (Boxes) -->
+            <div class="mt-10 pt-6 border-t border-gray-200">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-sm font-bold text-gray-500 uppercase tracking-wider">Soru Navigasyonu</h3>
+                    <div class="text-xs text-gray-500 flex gap-3">
+                        <span class="flex items-center gap-1"><span class="w-3 h-3 rounded bg-green-500 inline-block"></span> Doğru</span>
+                        <span class="flex items-center gap-1"><span class="w-3 h-3 rounded bg-red-500 inline-block"></span> Yanlış</span>
+                        <span class="flex items-center gap-1"><span class="w-3 h-3 rounded bg-white border border-gray-300 inline-block"></span> Boş</span>
+                    </div>
+                </div>
+                <!-- The Grid for 100 boxes -->
+                <div id="q-boxes-container" class="flex flex-wrap gap-2 max-h-48 overflow-y-auto custom-scrollbar p-1">
+                    <!-- Kutular JS ile eklenecek -->
+                </div>
+                
+                <button onclick="showResults()" class="mt-6 w-full bg-gray-800 hover:bg-gray-900 text-white font-bold py-2 px-4 rounded-lg transition shadow">
+                    Sınavı Erken Bitir ve Sonuçları Gör
                 </button>
             </div>
         </div>
 
         <!-- Result Area (Hidden initially) -->
-        <div id="result-area" class="p-8 text-center hidden flex-1 flex flex-col justify-center items-center">
+        <div id="result-area" class="p-8 text-center hidden flex-1 flex flex-col justify-center items-center py-20">
             <h2 class="text-4xl font-bold text-gray-800 mb-4">Sınav Tamamlandı!</h2>
-            <p class="text-gray-600 text-lg mb-8">100 soruluk maratonu bitirdin. İşte sonuçların:</p>
+            <p class="text-gray-600 text-lg mb-8">İşte 100 soruluk serüvendeki sonucun:</p>
             
             <div class="flex gap-8 justify-center mb-8">
                 <div class="bg-green-100 text-green-800 p-6 rounded-xl w-32 shadow-sm border border-green-200">
@@ -75,9 +105,13 @@
                     <div class="text-4xl font-bold mb-2" id="final-wrong">0</div>
                     <div class="text-sm font-semibold uppercase tracking-wide">Yanlış</div>
                 </div>
+                <div class="bg-gray-100 text-gray-800 p-6 rounded-xl w-32 shadow-sm border border-gray-200">
+                    <div class="text-4xl font-bold mb-2" id="final-empty">0</div>
+                    <div class="text-sm font-semibold uppercase tracking-wide">Boş</div>
+                </div>
             </div>
             
-            <button onclick="location.reload()" class="bg-gray-800 hover:bg-gray-900 text-white font-bold py-3 px-8 rounded-lg transition shadow-md">
+            <button onclick="location.reload()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg transition shadow-md">
                 Testi Yeniden Çöz
             </button>
         </div>
@@ -207,11 +241,14 @@
             {q:"Balıkesir'in Edremit Körfezi, Ayvalık ve Burhaniye gibi ilçelerinde Türkiye ekonomisine yön veren en önemli tarımsal faaliyet hangisidir?", opts:["Çay Yetiştiriciliği", "Zeytin ve Zeytinyağı Üretimi", "Fındık Üretimi", "Muz Yetiştiriciliği", "Seracılık"], ans: 1, info:"Kaz Dağları'nın oksijeniyle yetişen Ayvalık/Edremit zeytinleri ve zeytinyağları, coğrafi işaretli olup Türkiye'nin en kalitelileri arasındadır."}
         ];
 
-        // Uygulama Değişkenleri
+        // Uygulama Değişkenleri ve Veri Tutucu
         let currentQuestionIndex = 0;
         let scoreCorrect = 0;
         let scoreWrong = 0;
         let answered = false;
+        
+        // Kullanıcı cevaplarını hafızada tutacak dizi: { selected: index, isCorrect: boolean }
+        let userAnswers = new Array(questions.length).fill(null); 
 
         // DOM Elementleri
         const elQuestionText = document.getElementById('question-text');
@@ -225,20 +262,64 @@
         const elScoreWrong = document.getElementById('score-wrong');
         const elProgressBar = document.getElementById('progress-bar');
         const elNextBtn = document.getElementById('next-btn');
+        const elQBoxesContainer = document.getElementById('q-boxes-container');
         
         const elQuizArea = document.getElementById('quiz-area');
         const elResultArea = document.getElementById('result-area');
 
+        // Navigasyon Kutularını İlk Kez Oluştur
+        initBoxes();
+        
         // İlk Soruyu Yükle
         loadQuestion();
 
-        function loadQuestion() {
-            // Durumu Sıfırla
-            answered = false;
-            elFeedbackArea.classList.add('hidden');
-            elOptionsContainer.innerHTML = '';
+        function initBoxes() {
+            elQBoxesContainer.innerHTML = '';
+            for(let i=0; i<questions.length; i++) {
+                const box = document.createElement('button');
+                box.id = 'q-box-' + i;
+                box.innerText = i + 1;
+                // Click ile atlama özelliği
+                box.onclick = () => jumpToQuestion(i);
+                elQBoxesContainer.appendChild(box);
+            }
+        }
+
+        function updateBoxes() {
+            for(let i=0; i<questions.length; i++) {
+                const box = document.getElementById('q-box-' + i);
+                
+                // Temel sınıflar
+                box.className = 'w-10 h-10 text-sm font-semibold rounded-lg flex items-center justify-center transition-all border shrink-0';
+                
+                // Cevaplanma durumu
+                if (userAnswers[i] !== null) {
+                    if (userAnswers[i].isCorrect) {
+                        box.classList.add('bg-green-500', 'text-white', 'border-green-600');
+                    } else {
+                        box.classList.add('bg-red-500', 'text-white', 'border-red-600');
+                    }
+                } else {
+                    box.classList.add('bg-white', 'text-gray-600', 'border-gray-300', 'hover:bg-gray-100');
+                }
+
+                // Aktif (şu anki) soru vurgusu
+                if (i === currentQuestionIndex) {
+                    box.classList.add('ring-4', 'ring-blue-300', 'ring-offset-1');
+                }
+            }
             
-            // Veriyi Çek
+            // Kutuyu görüş alanına kaydır
+            const activeBox = document.getElementById('q-box-' + currentQuestionIndex);
+            if(activeBox) activeBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        function jumpToQuestion(index) {
+            currentQuestionIndex = index;
+            loadQuestion();
+        }
+
+        function loadQuestion() {
             const qData = questions[currentQuestionIndex];
             
             // İlerlemeyi Güncelle
@@ -248,33 +329,69 @@
             // Soruyu Yazdır
             elQuestionText.innerText = `${currentQuestionIndex + 1}. ${qData.q}`;
 
-            // Şıkları Oluştur
+            // Arayüzü Temizle
+            elOptionsContainer.innerHTML = '';
+            elFeedbackArea.classList.add('hidden');
+            
             const optionPrefixes = ['A', 'B', 'C', 'D', 'E'];
+            const pastAnswer = userAnswers[currentQuestionIndex];
+            
+            // Soru daha önce cevaplanmış mı?
+            answered = (pastAnswer !== null);
+
+            // Şıkları Oluştur
             qData.opts.forEach((optText, index) => {
                 const btn = document.createElement('button');
                 btn.className = 'option-btn w-full text-left p-4 rounded-xl border-2 border-gray-200 bg-gray-50 text-gray-700 font-medium hover:border-blue-400 focus:outline-none flex gap-3 items-center';
+                
+                // Eğer daha önceden cevaplandıysa stilleri uygula ve butonları dondur
+                if (answered) {
+                    btn.classList.add('disabled');
+                    btn.disabled = true;
+                    if (index === qData.ans) {
+                        btn.classList.add('correct');
+                    } else if (index === pastAnswer.selected && !pastAnswer.isCorrect) {
+                        btn.classList.add('incorrect');
+                    }
+                }
+
                 btn.innerHTML = `<span class="bg-gray-200 text-gray-600 rounded w-8 h-8 flex items-center justify-center font-bold font-mono">${optionPrefixes[index]}</span> <span>${optText}</span>`;
                 btn.onclick = () => checkAnswer(index, btn);
                 elOptionsContainer.appendChild(btn);
             });
 
-            // Son Soruysa Buton Metnini Değiştir
+            // Eğer daha önceden cevaplandıysa geri bildirimi direkt göster
+            if (answered) {
+                showFeedback(pastAnswer.isCorrect, qData.info);
+            }
+
+            // Buton Metni Ayarları
             if(currentQuestionIndex === questions.length - 1) {
                 elNextBtn.innerHTML = "Sınavı Bitir ve Sonucu Gör &rarr;";
                 elNextBtn.classList.replace('bg-blue-600', 'bg-green-600');
                 elNextBtn.classList.replace('hover:bg-blue-700', 'hover:bg-green-700');
+            } else {
+                elNextBtn.innerHTML = "Sonraki Soruya Geç &rarr;";
+                elNextBtn.classList.replace('bg-green-600', 'bg-blue-600');
+                elNextBtn.classList.replace('hover:bg-green-700', 'hover:bg-blue-700');
             }
+
+            // Kutuların durumunu güncelle
+            updateBoxes();
         }
 
         function checkAnswer(selectedIndex, clickedBtn) {
-            if(answered) return; // Zaten cevaplandıysa işlem yapma
+            if(answered) return;
             answered = true;
 
             const qData = questions[currentQuestionIndex];
             const isCorrect = (selectedIndex === qData.ans);
-            const allButtons = elOptionsContainer.querySelectorAll('button');
+            
+            // Cevabı Hafızaya Kaydet
+            userAnswers[currentQuestionIndex] = { selected: selectedIndex, isCorrect: isCorrect };
 
             // Tüm butonları devre dışı bırak
+            const allButtons = elOptionsContainer.querySelectorAll('button');
             allButtons.forEach(btn => {
                 btn.classList.add('disabled');
                 btn.disabled = true;
@@ -288,12 +405,14 @@
                 showFeedback(true, qData.info);
             } else {
                 clickedBtn.classList.add('incorrect');
-                // Doğru olanı da yeşil yap
-                allButtons[qData.ans].classList.add('correct');
+                allButtons[qData.ans].classList.add('correct'); // Doğruyu göster
                 scoreWrong++;
                 elScoreWrong.innerText = scoreWrong;
                 showFeedback(false, qData.info);
             }
+            
+            // Alt kutuları anında güncelle
+            updateBoxes();
         }
 
         function showFeedback(isCorrect, infoText) {
@@ -301,7 +420,7 @@
             
             if(isCorrect) {
                 elFeedbackBox.className = 'p-4 rounded-lg border-l-4 bg-green-50 border-green-500 text-green-800';
-                elFeedbackTitle.innerText = 'Tebrikler, Doğru Cevap!';
+                elFeedbackTitle.innerText = 'Doğru Cevap!';
             } else {
                 elFeedbackBox.className = 'p-4 rounded-lg border-l-4 bg-red-50 border-red-500 text-red-800';
                 elFeedbackTitle.innerText = 'Yanlış Cevap!';
@@ -323,8 +442,11 @@
             elQuizArea.classList.add('hidden');
             elResultArea.classList.remove('hidden');
             
+            const emptyCount = questions.length - (scoreCorrect + scoreWrong);
+            
             document.getElementById('final-correct').innerText = scoreCorrect;
             document.getElementById('final-wrong').innerText = scoreWrong;
+            document.getElementById('final-empty').innerText = emptyCount;
         }
     </script>
 </body>
